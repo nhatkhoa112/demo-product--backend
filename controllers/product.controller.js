@@ -151,7 +151,7 @@ const productController = {
         req.params.id,
         { ...req.body },
         { new: true }
-      );
+      ).populate('categories');
 
       await product.save();
       res.json({ msg: 'Updated a Product', data: { product } });
