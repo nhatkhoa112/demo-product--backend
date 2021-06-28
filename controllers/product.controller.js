@@ -53,7 +53,9 @@ const productController = {
         sold,
       } = req.body;
       if (!images) return res.status(400).json({ msg: 'No image upload' });
+
       const product = await Product.findOne({ product_id });
+
       if (product)
         return res.status(400).json({ msg: 'This product is already exists.' });
       const newProduct = await new Product({
@@ -67,6 +69,9 @@ const productController = {
         reviews,
         sold,
       });
+
+      await newProduct.populate({ path: 'categories', model: 'Category' });
+      await newProduct.execPopulate();
       await newProduct.save();
       res.json({ msg: 'Created a product', data: { product: newProduct } });
     } catch (error) {
