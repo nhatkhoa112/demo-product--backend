@@ -165,6 +165,24 @@ const userController = {
   getUserInfor: async (req, res) => {
     try {
       const user = await User.findById(req.user.id, { password: 0 });
+      await user.populate({
+        path: 'orders',
+        model: 'Order',
+        populate: {
+          path: 'orderItems',
+          model: 'OrderItem',
+          populate: {
+            path: 'product',
+            model: 'Product',
+            populate: {
+              path: 'categories',
+              model: 'Category',
+            },
+          },
+        },
+      });
+      await user.execPopulate();
+      await user.save();
       if (!user)
         return res.status(400).json({ msg: 'Invalid Authentication.' });
       res.json(user);
@@ -176,6 +194,7 @@ const userController = {
   getUsersAllInfor: async (req, res) => {
     try {
       const users = await User.find({}, { password: 0 });
+
       res.json(users);
     } catch (error) {
       res.status(500).json({ msg: error.message });
@@ -200,7 +219,24 @@ const userController = {
         { new: true }
       );
 
-      res.json({ msg: 'Update Success!.', data: { user } });
+      let newUser = await User.findById(req.user.id).populate({
+        path: 'orders',
+        model: 'Order',
+        populate: {
+          path: 'orderItems',
+          model: 'OrderItem',
+          populate: {
+            path: 'product',
+            model: 'Product',
+            populate: {
+              path: 'categories',
+              model: 'Category',
+            },
+          },
+        },
+      });
+
+      res.json({ msg: 'Update Success!.', data: { user: newUser } });
     } catch (error) {
       res.status(500).json({ msg: error.message });
     }
